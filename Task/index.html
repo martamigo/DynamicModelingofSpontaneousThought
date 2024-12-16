@@ -1,0 +1,1777 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+
+    <script src="https://lib.pavlovia.org/vendors/jspsych-7.1.2/jspsych.js"></script>
+    <script src="https://lib.pavlovia.org/vendors/jspsych-7.1.2/plugin-html-keyboard-response.js"></script>
+    <script src="https://lib.pavlovia.org/vendors/jspsych-7.1.2/plugin-html-button-response.js"></script>
+    <script src="https://lib.pavlovia.org/vendors/jspsych-7.1.2/plugin-image-button-response.js"></script>
+    <script src="https://lib.pavlovia.org/vendors/jspsych-7.1.2/plugin-html-slider-response.js"></script>
+    <script src="https://lib.pavlovia.org/vendors/jspsych-7.1.2/plugin-external-html.js"></script>
+    <script src="https://lib.pavlovia.org/vendors/jspsych-7.1.2/plugin-instructions.js"></script>
+    <script src="https://lib.pavlovia.org/vendors/jspsych-7.1.2/plugin-survey-text.js"></script>
+    <script src="https://lib.pavlovia.org/vendors/jspsych-7.1.2/plugin-survey-likert.js"></script>
+    <script src="https://lib.pavlovia.org/vendors/jspsych-7.1.2/plugin-call-function.js"></script>
+    <script src="https://lib.pavlovia.org/vendors/jspsych-7.1.2/plugin-survey-multi-choice.js"></script>
+    <script src="https://lib.pavlovia.org/vendors/jspsych-7.1.2/plugin-preload.js"></script>
+    <link rel="stylesheet" href="https://lib.pavlovia.org/vendors/jspsych-7.1.2/jspsych.css">
+    </link>
+
+    <script type="text/javascript" src="https://pavlovia.org/lib/jspsych-7-pavlovia-2022.1.1.js"></script>
+
+
+
+
+
+
+</head>
+
+<body></body>
+<script>
+
+    var jsPsych = initJsPsych(
+        {
+            //timeline: timeline,
+            show_progress_bar: true,
+            /*on_load: function () {
+                
+            },*/
+            on_finish: function () {
+                //saveData(jsPsych.data.get().json());
+                /*jsPsych.data.addProperties({ RRS: RRS_result });
+                var file_name = 'subject_' + id + '_data.csv';
+                // save the data with this file name
+                jsPsych.data.get().localSave('csv', file_name);
+                jsPsych.data.displayData('json');
+                //jsPsych.data.addProperties({ RRS: RRS_result });
+                //saveData(jsPsych.data.get().csv());*/
+                //window.location.assign("https://www.google.com/);
+                location.href = 'https://app.prolific.co/submissions/complete?cc=CIYWI830';
+            }
+        }
+    );
+    var subject_id = jsPsych.randomization.randomID(8);
+    var study_id = "New_FAST";
+    //var subject_id = jsPsych.data.getURLVariable('PROLIFIC_PID');
+    //var study_id = jsPsych.data.getURLVariable('STUDY_ID');
+    //var session_id = jsPsych.data.getURLVariable('SESSION_ID');
+    //var urly = 'https://docs.google.com/forms/d/e/1FAIpQLScifa2YRWJYBSEGyvGHox_m7ETB6_sWlEW4YQzv3BKt1fjakA/viewform?usp=pp_url&entry.1338764612=' + subject_id;
+    var timeline = [];
+    var pavlovia_init = {
+        type: jsPsychPavlovia,
+        command: "init"
+    };
+
+    //timeline.push(pavlovia_init);
+
+    jsPsych.data.addProperties({
+        subject_id: subject_id,
+        study_id: study_id,
+        //session_id: session_id,
+    });
+
+    var seedword = ['win', 'beautiful', 'spouse', 'heart', 'father', 'trip', 'future', 'failure', 'shame', 'pain', 'worry', 'jealousy', 'crisis', 'alone', 'noise', 'want', 'teach', 'breath', 'advice', 'beginning', 'memory'];
+
+    // Save data to CSV
+    var save_data_csv = function (name, data) {
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', 'php/save_data.php'); //perhaps chane file path when you reorder the files
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.send(JSON.stringify({ filename: name, filedata: data }));
+    };
+    // Grab data before the end of the experiment
+    var save_data = {
+        type: jsPsychCallFunction,
+        func: function () {
+            save_data_csv(subject_id + '_output', jsPsych.data.get().csv());
+        },
+        timing_post_trial: 0
+    }
+
+    const IntroNine = {
+        type: jsPsychHtmlKeyboardResponse,
+        stimulus: '<p>Good job!</p> Now you are going to move on to the actual task</p><p> Ready?</p><p>-</p><p>Press SPACE to <b>start!</b></p>',
+        choices: ' ',
+        on_finish: function () {
+            jsPsych.data.addDataToLastTrial({ trial_type: '' });
+        }
+    }
+
+    const Practice = {
+        type: jsPsychHtmlKeyboardResponse,
+        stimulus: '<p>Let us practice!</p><p>You will now be completing two practice trials.</p><p>-</p><p>Press SPACE to <b>start!</b></p>',
+        choices: ' ',
+        on_finish: function () {
+            jsPsych.data.addDataToLastTrial({ trial_type: '' });
+        }
+    }
+
+    var studydata = [];
+    var iterationdata = [];
+    let num = 0;
+    var time_left = 5000;
+
+    var seedtrial = {
+        type: jsPsychSurveyText,
+        trial_duration: 5000,
+        post_trial_gap: 50,
+        response_ends_trial: true,
+        questions: [
+            { prompt: stimuli }
+        ],
+        data: {
+            task: 'response',
+        }
+    }
+    var consent = {
+        type: jsPsychHtmlButtonResponse,
+        choices: ['Accept'],
+        response_ends_trial: true,
+        stimulus: '<h1>Informed consent to participate in this study</h1> <p>This study will take about <b> 60 minutes</b>.</p> <p>This study is part of an Emory University scientific research project. Your decision to complete this study is voluntary. There is no way for us to identify you.</p><p> You can quit the study at any time.</p> <p>The only information we will have, in addition to your responses, is the time at which you completed the survey </p><p>and generic non-identifiable about your computer such as its resolution and browser version number.</p> <p>The results of the research may be presented at scientific meetings or published in scientific journals.</p> <p>The responses collected in this experiment will be released to the scientific community and the public.</p> <p>Clicking on the "SUBMIT" button on the bottom of this page indicates that you are at least 18 years of age and agree to complete this study voluntarily.</p>',
+        on_finish: function () {
+            jsPsych.data.addDataToLastTrial({ response: 'Accept' });
+            jsPsych.data.addDataToLastTrial({ trial_type: '' });
+        }
+    }
+    var DAS_intro = {
+        type: jsPsychHtmlButtonResponse,
+        choices: ['Ready'],
+        response_ends_trial: true,
+        stimulus: '<h1>Dysfunctional Attitude Scale</h1> <p>7/9</p><p>This scale will be 18 questions long</p> <p><b>Instructions: </b></p><p>The sentences below describe people s attitudes. Circle the number which best describes how much each </p><p>sentence describes your attitude. Your answer should describe the way you think most of the time.</p>',
+        on_finish: function () {
+            jsPsych.data.addDataToLastTrial({ response: '' });
+            jsPsych.data.addDataToLastTrial({ trial_type: '' });
+        }
+    }
+    var DAS_count = 1;
+    var DAS_result = 0;
+    var DAS = {
+        timeline: [
+            {
+                type: jsPsychSurveyMultiChoice,
+                questions: [{
+                    prompt: jsPsych.timelineVariable('q'),
+                    options: ['totally agree', 'agree', 'disagree', 'totally disagree'],
+                    required: true
+                }],
+                on_finish() {
+                    console.log(DAS_result);
+                    if (jsPsych.data.get().last(1).select('response').values[0].Q0 == 'totally disagree') {
+                        DAS_result++;
+                    } else if (jsPsych.data.get().last(1).select('response').values[0].Q0 == 'disagree') {
+                        DAS_result += 2;
+                    } else if (jsPsych.data.get().last(1).select('response').values[0].Q0 == 'agree') {
+                        DAS_result += 3;
+                    } else {
+                        DAS_result += 4;
+                    }
+                    DAS_count++;
+                }
+            }
+        ],
+        timeline_variables: [
+            { q: '1. If I do not set the highest standards for myself, I am likely to end up a second-rate person.' },
+            { q: '2. My value as a person depends greatly on what others think of me.' },
+            { q: '3. People will probably think less of me if I make a mistake.' },
+            { q: '4. I am nothing if a person I love does not love me.' },
+            { q: '5. If other people know what you are really like, they will think less of you.' },
+            { q: '6. If I fail at my work, then I am a failure as a person.' },
+            { q: '7. My happiness depends more on other people than it does me.' },
+            { q: '8. I cannot be happy unless most people I know admire me.' },
+            { q: '9. It is best to give up your own interests in order to please other people.' },
+        ],
+        data: [{
+            trial: 'DAS'
+        }],
+        on_timeline_finish: function () {
+            jsPsych.data.addProperties({ DAS: DAS_result });
+            jsPsych.data.addDataToLastTrial({ trial_type: 'DAS' });
+        },
+    }
+    var gend_result = "";
+    var Gender = {
+        timeline: [
+            {
+                type: jsPsychSurveyMultiChoice,
+                required: true,
+                questions: [{
+                    prompt: jsPsych.timelineVariable('q'),
+                    options: ['Cis-Woman', 'Cis-Man', 'Trans-Woman', 'Trans-Men', 'Other'],
+                    required: true
+                }],
+            }
+        ],
+        timeline_variables: [
+            { q: 'I identify as a:' },
+        ],
+        data: [{
+            trial: 'Gender'
+        }],
+        on_timeline_finish: function () {
+            jsPsych.data.addProperties({ Gender: jsPsych.data.get().last(1).select('response').values[0].Q0 });
+            jsPsych.data.addDataToLastTrial({ trial_type: 'Gender' });
+        },
+    }
+
+    var MWQ_intro = {
+        type: jsPsychHtmlButtonResponse,
+        choices: ['Ready'],
+        response_ends_trial: true,
+        stimulus: '<h1>Mind-Wandering Questionnaire</h1> <p>4/9</p><p>This scale will be 5 questions long </p> <p><b>Instructions: </b></p><p>Using the provided scale, please indicate how often you currently have each experience</p>',
+        on_finish: function () {
+            jsPsych.data.addDataToLastTrial({ response: '' });
+            jsPsych.data.addDataToLastTrial({ trial_type: '' });
+        }
+    }
+
+    var MWQ_scoring = 0;
+    var MWQ = {
+        timeline: [
+            {
+                type: jsPsychSurveyMultiChoice,
+                questions: [{
+                    prompt: jsPsych.timelineVariable('q'),
+                    options: ['almost never', 'very infrequently', 'somewhat infrequently', 'somewhat frequently', 'very frequently', 'almost always'],
+                    required: true
+                }],
+                on_finish() {
+                    console.log(MWQ_scoring);
+                    if (jsPsych.data.get().last(1).select('response').values[0].Q0 == 'almost never') {
+                        MWQ_scoring++;
+                    } else if (jsPsych.data.get().last(1).select('response').values[0].Q0 == 'very infrequently') {
+                        MWQ_scoring += 2;
+                        rn=2;
+                    } else if (jsPsych.data.get().last(1).select('response').values[0].Q0 == 'somewhat infrequently') {
+                        MWQ_scoring += 3;
+                        rn=3;
+                    } else if (jsPsych.data.get().last(1).select('response').values[0].Q0 == 'somewhat frequently') {
+                        MWQ_scoring += 4;
+                        rn=3;
+                    } else if (jsPsych.data.get().last(1).select('response').values[0].Q0 == 'very infrequently') {
+                        MWQ_scoring += 5;
+                        rn=4;
+                    } else {
+                        MWQ_scoring += 6;
+                        rn=5;
+                    }
+                }
+            }
+        ],
+        timeline_variables: [
+            { q: '1. I have difficulty maintaining focus on simple or repetitive work.' },
+            { q: '2. While reading, I find I have not been thinking about the text and must therefore read it again.' },
+            { q: '3. I do things without paying full attention.' },
+            { q: '4. I find myself listening with one ear, thinking about something else at the same time.' },
+            { q: '5. I mind-wander during lectures or presentations.' },
+        ],
+        data: [{
+            trial: 'MWQ'
+        }],
+        on_timeline_finish: function () {
+            jsPsych.data.addProperties({ MWQ: MWQ_scoring });
+        },
+    }
+
+    var RRS_intro = {
+        type: jsPsychHtmlButtonResponse,
+        choices: ['Ready'],
+        response_ends_trial: true,
+        stimulus: '<h1>Rumination Response Scale</h1> <p>1/9</p><p>This scale will be 22 questions long </p> <p><b>Instructions: </b></p><p>People think and do many different things when they feel depressed. Please read each of the items </p><p>below and indicate whether you almost never, sometimes, often, or almost always think or do each one when you feel down, sad, or depressed.</p><p> Please indicate what you generally do, not what you think you should do.</p>',
+        on_finish: function () {
+            jsPsych.data.addDataToLastTrial({ response: '' });
+            jsPsych.data.addDataToLastTrial({ trial_type: '' });
+        }
+    }
+    var RRS_count = 0;
+    var RRS_result = 0;
+    var Reflection = 0;
+    var Depression = 0;
+    var Brooding = 0;
+    var rn=0;
+    var RRS = {
+        timeline: [
+            {
+                type: jsPsychSurveyMultiChoice,
+                questions: [{
+                    prompt: jsPsych.timelineVariable('q'),
+                    options: ['almost never', 'sometimes', 'often', 'almost always'],
+                    required: true
+                }],
+                on_finish() {
+                    console.log(RRS_result);
+                    if (jsPsych.data.get().last(1).select('response').values[0].Q0 == 'almost never') {
+                        RRS_result++;
+                        rn = 1;
+                    } else if (jsPsych.data.get().last(1).select('response').values[0].Q0 == 'sometimes') {
+                        RRS_result += 2;
+                        rn=2;
+                    } else if (jsPsych.data.get().last(1).select('response').values[0].Q0 == 'often') {
+                        RRS_result += 3;
+                        rn=3;
+                    } else {
+                        RRS_result += 4;
+                        rn=4;
+                    }
+                    if (RRS_count==5 || RRS_count==10 || RRS_count==13 || RRS_count==15 || RRS_count==16 ){
+                        Brooding += rn;
+                    } else if (RRS_count==7 || RRS_count==11 || RRS_count==12 || RRS_count==20 || RRS_count==21){
+                        Reflection += rn;
+                    } else{
+                        Depression += rn;
+                    }
+                    RRS_count++;
+                }
+            }
+        ],
+        timeline_variables: [
+            { q: '1. think about how alone you feel' },
+            { q: '2. think "I will not be able to do my job if I do not snap out of this"' },
+            { q: '3. think about your feelings of fatigue and achiness' },
+            { q: '4. think about how hard it is to concentrate' },
+            { q: '5. think "What am I doing to deserve this?"' },
+            { q: '6. think about how passive and unmotivated you feel' },
+            { q: '7. analyze recent events to try to understand why you are depressed' },
+            { q: '8. think about how you do not seem to feel anything anymore' },
+            { q: '9. think "Why can I not get going?"' },
+            { q: '10. think "Why do I always react this way?"' },
+            { q: '11. go away by yourself and think about why you feel this way' },
+            { q: '12. write down what you are thinking about and analyze it' },
+            { q: '13. think about a recent situation, wishing it had gone better' },
+            { q: '14. think "I will not be able to concentrate if I keep feeling this way."' },
+            { q: '15. think "Why do I have problems other people do not have?"' },
+            { q: '16. think "Why can I not handle things better?"' },
+            { q: '17. think about how sad you feel' },
+            { q: '18. think about all your shortcomings, failings, faults, mistakes' },
+            { q: '19. think about how you do not feel up to doing anything' },
+            { q: '20. analyze your personality to try to understand why you are depressed' },
+            { q: '21. go someplace alone to think about your feelings' },
+            { q: '22. think about how angry you are with yourself' },
+        ],
+        data: [{
+            trial: 'RRS'
+        }],
+        on_timeline_finish: function () {
+            jsPsych.data.addProperties({ RRS: RRS_result });
+            jsPsych.data.addProperties({ Brooding: Brooding });
+            jsPsych.data.addProperties({ Reflection: Reflection });
+            jsPsych.data.addProperties({ Depression: Depression });
+            jsPsych.data.addDataToLastTrial({ trial_type: 'RRS' });
+        },
+    }
+
+    var PTQ_intro = {
+        type: jsPsychHtmlButtonResponse,
+        choices: ['Ready'],
+        response_ends_trial: true,
+        stimulus: '<h1>The Perseverative Thought Questionnaire</h1> <p>3/9</p><p>This scale will be 15 questions long </p> <p><b>Instructions: </b></p><p>In this questionnaire, you will be asked to describe how you typically think about negative </p><p>experiences or problems. Please read the following statements and rate the extent to which </p><p> they apply to you when you think about negative experiences or problems.</p>',
+        on_finish: function () {
+            jsPsych.data.addDataToLastTrial({ response: '' });
+            jsPsych.data.addDataToLastTrial({ trial_type: '' });
+        }
+    }
+
+    var PTQ_result=0;
+    var PTQ_count=0;
+
+    var PTQ = {
+        timeline: [
+            {
+                type: jsPsychSurveyMultiChoice,
+                questions: [{
+                    prompt: jsPsych.timelineVariable('q'),
+                    options: ['never', 'rarely', 'sometimes', 'often', 'almost always'],
+                    required: true
+                }],
+                on_finish() {
+                    console.log(PTQ_result);
+                    if (jsPsych.data.get().last(1).select('response').values[0].Q0 == 'never') {
+                    } else if (jsPsych.data.get().last(1).select('response').values[0].Q0 == 'rarely') {
+                        PTQ_result += 1;
+                    } else if (jsPsych.data.get().last(1).select('response').values[0].Q0 == 'sometimes') {
+                        PTQ_result += 2;
+                    } else if (jsPsych.data.get().last(1).select('response').values[0].Q0 == 'often') {
+                        PTQ_result += 3;
+                    } else {
+                        PTQ_result += 4;
+                    }
+                    PTQ_count++;
+                }
+            }
+        ],
+        timeline_variables: [
+            { q: '1. The same thoughts keep going through my mind again and again' },
+            { q: '2. Thoughts intrude into my mind' },
+            { q: '3. I cannot stop dwelling on them' },
+            { q: '4. I think about many problems without solving any of them' },
+            { q: '5. I cannot do anything else while thinking about my problems.' },
+            { q: '6. My thoughts repeat themselves' },
+            { q: '7. Thoughts come to my mind without me wanting them to' },
+            { q: '8. I get stuck on certain issues and cannot move on' },
+            { q: '9. I keep asking myself questions without finding an answer' },
+            { q: '10. My thoughts prevent me from focusing on other things' },
+            { q: '11. I keep thinking about the same issue all the time' },
+            { q: '12. Thoughts just pop into my mind' },
+            { q: '13. I feel driven to continue dwelling on the same issue' },
+            { q: '14. My thoughts are not much help to me' },
+            { q: '15. My thoughts take up all my attention' },
+        ],
+        data: [{
+            trial: 'PTQ'
+        }],
+        on_timeline_finish: function () {
+            jsPsych.data.addProperties({ PTQ: PTQ_result });
+            jsPsych.data.addDataToLastTrial({ trial_type: 'PTQ' });
+        },
+    }
+    function saveDataLine(data) {
+        // choose the data we want to save
+        var data_to_save = [
+            data.type, data.stimulus, data.stimulus_duration, data.fixation_duration, data.rt
+        ];
+        // join these with commas and add a newline
+        var line = data_to_save.join(',') + "\n";
+        saveData("test.csv", line);
+    }
+
+
+    var GAD_intro = {
+        type: jsPsychHtmlButtonResponse,
+        choices: ['Ready'],
+        response_ends_trial: true,
+        stimulus: '<h1>General Anxiety Disorder</h1> <p>9/10</p><p>This scale will be 7 questions long</p> <p><b>Instructions: </b></p><p>How often have they been bothered by the following over the past 2 weeks?</p>',
+        on_finish: function () {
+            jsPsych.data.addDataToLastTrial({ response: '' });
+            jsPsych.data.addDataToLastTrial({ trial_type: '' });
+        }
+    }
+    var GAD_count = 0;
+    var GAD_result = 0;
+    var GAD = {
+        timeline: [
+            {
+                type: jsPsychSurveyMultiChoice,
+                questions: [{
+                    prompt: jsPsych.timelineVariable('q'),
+                    options: ['not at all', 'several days', 'more than half days', 'nearly every day'],
+                    required: true
+                }],
+                on_finish() {
+                    console.log(GAD_result);
+                    if (jsPsych.data.get().last(1).select('response').values[0].Q0 == 'not at all') {
+                        GAD_result++;
+                    } else if (jsPsych.data.get().last(1).select('response').values[0].Q0 == 'several days') {
+                        GAD_result += 2;
+                    } else if (jsPsych.data.get().last(1).select('response').values[0].Q0 == 'more than half days') {
+                        GAD_result += 3;
+                    } else {
+                        GAD_result += 4;
+                    }
+                    GAD_count++;
+                }
+            }
+        ],
+        timeline_variables: [
+            { q: '1. Feeling nervous, anxious, or on edge' },
+            { q: '2. Not being able to stop or control worrying' },
+            { q: '3. Worrying too much about different things' },
+            { q: '4. Trouble relaxing' },
+            { q: '5. Being so restless that it is hard to sit still' },
+            { q: '6. Becoming easily annoyed or irritable' },
+            { q: '7. Feeling afraid, as if something awful might happen' },
+        ],
+        data: [{
+            trial: 'GAD'
+        }],
+        on_timeline_finish: function () {
+            jsPsych.data.addProperties({ GAD: GAD_result });
+            jsPsych.data.addDataToLastTrial({ trial_type: 'GAD' });
+        },
+    }
+
+
+
+    var PHQ_intro = {
+        type: jsPsychHtmlButtonResponse,
+        choices: ['Ready'],
+        response_ends_trial: true,
+        stimulus: '<h1>Patient Health Questionnairer</h1> <p>10/10</p><p>This scale will be 9 questions long</p> <p><b>Instructions: </b></p><p>In the last 2 weeks, how often have they been bothered by any of the following problems?</p>',
+        on_finish: function () {
+            jsPsych.data.addDataToLastTrial({ response: '' });
+            jsPsych.data.addDataToLastTrial({ trial_type: '' });
+        }
+    }
+    var PHQ_count = 0;
+    var PHQ_result = 0;
+    var PHQ = {
+        timeline: [
+            {
+                type: jsPsychSurveyMultiChoice,
+                questions: [{
+                    prompt: jsPsych.timelineVariable('q'),
+                    options: ['not at all', 'several days', 'more than half days', 'nearly every day'],
+                    required: true
+                }],
+                on_finish() {
+                    console.log(PHQ_result);
+                    if (jsPsych.data.get().last(1).select('response').values[0].Q0 == 'not at all') {
+                    } else if (jsPsych.data.get().last(1).select('response').values[0].Q0 == 'several days') {
+                        PHQ_result += 1;
+                    } else if (jsPsych.data.get().last(1).select('response').values[0].Q0 == 'more than half days') {
+                        PHQ_result += 2;
+                    } else {
+                        PHQ_result += 3;
+                    }
+                    PHQ_count++;
+                }
+            }
+        ],
+        timeline_variables: [
+            { q: '1. Little interest or pleasure in doing things' },
+            { q: '2. Feeling down, depressed, or hopeless' },
+            { q: '3. Trouble falling asleep, or sleeping too much' },
+            { q: '4. Feeling tired or having little energy' },
+            { q: '5. Poor appetite or overeating' },
+            { q: '6. Feeling bad about yourself or that you are a failure or have let yourself or your family down' },
+            { q: '7. Trouble concentrating on things, such as reading the newspaper or watching television' },
+            { q: '8. Moving or speaking so slowly that other people could have noticed. Or the opposite - being so fidgety or restless that you have been moving around a lot more than usual' },
+            { q: '9. Thoughts that you would be better off dead, or of hurting yourself' },
+        ],
+        data: [{
+            trial: 'PHQ'
+        }],
+        on_timeline_finish: function () {
+            jsPsych.data.addProperties({ PHQ: PHQ_result });
+            jsPsych.data.addDataToLastTrial({ trial_type: 'PHQ' });
+        },
+    }
+
+
+
+    var PSS_intro = {
+        type: jsPsychHtmlButtonResponse,
+        choices: ['Ready'],
+        response_ends_trial: true,
+        stimulus: '<h1>Perceived Stress Scale</h1> <p>8/9</p><p>This scale will be 10 questions long</p> <p><b>Instructions: </b></p><p>For each question choose from the following alternatives:</p>',
+        on_finish: function () {
+            jsPsych.data.addDataToLastTrial({ response: '' });
+            jsPsych.data.addDataToLastTrial({ trial_type: '' });
+        }
+    }
+    var PSS_count = 1;
+    var PSS_result = 0;
+    var PSS = {
+        timeline: [
+            {
+                type: jsPsychSurveyMultiChoice,
+                questions: [{
+                    prompt: jsPsych.timelineVariable('q'),
+                    options: ['never', 'almost never', 'sometimes', 'fairly often', 'very often'],
+                    required: true
+                }],
+                on_finish() {
+                    console.log(PSS_result);
+                    if (PSS_count == 4 || PSS_count == 5 || PSS_count == 7 || PSS_count == 8) {
+                        if (jsPsych.data.get().last(1).select('response').values[0].Q0 == 'never') {
+                            PSS_result += 4;
+                        } else if (jsPsych.data.get().last(1).select('response').values[0].Q0 == 'almost never') {
+                            PSS_result += 3;
+                        } else if (jsPsych.data.get().last(1).select('response').values[0].Q0 == 'sometimes') {
+                            PSS_result += 2;
+                        } else if (jsPsych.data.get().last(1).select('response').values[0].Q0 == 'fairly often') {
+                            PSS_result += 1;
+                        } else {
+                        }
+                        PSS_count++;
+                    } else {
+                        if (jsPsych.data.get().last(1).select('response').values[0].Q0 == 'never') {
+                        } else if (jsPsych.data.get().last(1).select('response').values[0].Q0 == 'almost never') {
+                            PSS_result += 2;
+                        } else if (jsPsych.data.get().last(1).select('response').values[0].Q0 == 'sometimes') {
+                            PSS_result += 3;
+                        } else if (jsPsych.data.get().last(1).select('response').values[0].Q0 == 'fairly often') {
+                            PSS_result += 4;
+                        } else {
+                            PSS_result += 5;
+                        }
+                        PSS_count++;
+                    }
+                }
+            }
+        ],
+        timeline_variables: [
+            { q: '1. In the last month, how often have you been upset because of something that happened unexpectedly?' },
+            { q: '2. In the last month, how often have you felt that you were unable to control the important things in your life?' },
+            { q: '3. In the last month, how often have you felt nervous and stressed?' },
+            { q: '4. In the last month, how often have you felt confident about your ability to handle your personal problems?' },
+            { q: '5. In the last month, how often have you felt that things were going your way?' },
+            { q: '6. In the last month, how often have you found that you could not cope with all the things that you had to do?' },
+            { q: '7. In the last month, how often have you been able to control irritations in your life?' },
+            { q: '8. In the last month, how often have you felt that you were on top of things?' },
+            { q: '9. In the last month, how often have you been angered because of things that happened that were outside of your control?' },
+            { q: '10. In the last month, how often have you felt difficulties were piling up so high that you could not overcome them?' },
+        ],
+        data: [{
+            trial: 'PSS'
+        }],
+        on_timeline_finish: function () {
+            jsPsych.data.addProperties({ PSS: PSS_result });
+            jsPsych.data.addDataToLastTrial({ trial_type: 'PSS' });
+        },
+    }
+
+
+
+
+    var DARS_intro = {
+        type: jsPsychHtmlButtonResponse,
+        choices: ['Ready'],
+        response_ends_trial: true,
+        stimulus: '<h1>Dimensional Anhedonia Rating Scale</h1> <p>6/9</p><p>This scale will be 21 questions long</p>',
+        on_finish: function () {
+            jsPsych.data.addDataToLastTrial({ response: '' });
+            jsPsych.data.addDataToLastTrial({ trial_type: '' });
+        }
+    }
+    var DARS_count = 0;
+    var DARS_result = 0;
+    var questionnaires = []
+    var hobbies = 0;
+    var DARS_2 = {
+        timeline: [
+            {
+                type: jsPsychSurveyMultiChoice,
+                questions: [{
+                    prompt: jsPsych.timelineVariable('q'),
+                    options: ['not at all', 'slightly', 'moderately', 'mostly', 'very much'],
+                    required: true,
+                }],
+                on_finish() {
+                    console.log(DARS_result);
+                    if (jsPsych.data.get().last(1).select('response').values[0].Q0 == 'very much') {
+                        DARS_result+= 4;
+                        hobbies+= 4;
+                    } else if (jsPsych.data.get().last(1).select('response').values[0].Q0 == 'mostly') {
+                        DARS_result += 3;
+                        hobbies += 3;
+                    } else if (jsPsych.data.get().last(1).select('response').values[0].Q0 == 'moderately') {
+                        DARS_result += 2;
+                        hobbies += 2;
+                    } else if (jsPsych.data.get().last(1).select('response').values[0].Q0 == 'slightly') {
+                        DARS_result += 1;
+                        hobbies += 1;
+                    } else {
+                        DARS_result += 0;
+                        hobbies += 0;
+                    }
+                    DARS_count++;
+                }
+            }
+        ],
+        timeline_variables: [
+            { q: 'A.1. I would enjoy these activities' },
+            { q: 'A.2. I would spend time doing these activities"' },
+            { q: 'A.3. I want to do these activities' },
+            { q: 'A.4. These activities would interest me' },
+        ],
+
+    }
+
+    var food=0;
+    var DARS_4 = {
+        timeline: [
+            {
+                type: jsPsychSurveyMultiChoice,
+                questions: [{
+                    prompt: jsPsych.timelineVariable('p'),
+                    options: ['not at all', 'slightly', 'moderately', 'mostly', 'very much'],
+                    required: true,
+                }],
+                on_finish() {
+                    console.log(DARS_result);
+                    if (jsPsych.data.get().last(1).select('response').values[0].Q0 == 'very much') {
+                        DARS_result+= 4;
+                        food+= 4;
+                    } else if (jsPsych.data.get().last(1).select('response').values[0].Q0 == 'mostly') {
+                        DARS_result += 3;
+                        food += 3;
+                    } else if (jsPsych.data.get().last(1).select('response').values[0].Q0 == 'moderately') {
+                        DARS_result += 2;
+                        food += 2;
+                    } else if (jsPsych.data.get().last(1).select('response').values[0].Q0 == 'slightly') {
+                        DARS_result += 1;
+                        food += 1;
+                    } else {
+                        DARS_result += 0;
+                        food += 0;
+                    }
+                    DARS_count++;
+                }
+            }
+        ],
+        timeline_variables: [
+            { p: 'B.1. I would make an effort to get/make these foods/drinks' },
+            { p: 'B.2. I would enjoy these foods/drinks' },
+            { p: 'B.3. I want to have these foods/drinks' },
+            { p: 'B.4. I would eat as much of these foods as I could' },
+        ]
+    }
+
+    var social = 0;
+    var DARS_6 = {
+        timeline: [
+            {
+                type: jsPsychSurveyMultiChoice,
+                questions: [{
+                    prompt: jsPsych.timelineVariable('l'),
+                    //name: 'DARS',
+                    options: ['not at all', 'slightly', 'moderately', 'mostly', 'very much'],
+                    required: true,
+                }],
+                on_finish() {
+                    console.log(DARS_result);
+                    if (jsPsych.data.get().last(1).select('response').values[0].Q0 == 'very much') {
+                        DARS_result+= 4;
+                        social+= 4;
+                        //jsPsych.data.get().last(1).select('response').values[0].Q0;
+                    } else if (jsPsych.data.get().last(1).select('response').values[0].Q0 == 'mostly') {
+                        DARS_result += 3;
+                        social += 3;
+                    } else if (jsPsych.data.get().last(1).select('response').values[0].Q0 == 'moderately') {
+                        DARS_result += 2;
+                        social += 2;
+                    } else if (jsPsych.data.get().last(1).select('response').values[0].Q0 == 'slightly') {
+                        DARS_result += 1;
+                        social += 1;
+                    } else {
+                        DARS_result += 0;
+                        social += 0;
+                    }
+                    DARS_count++;
+                }
+            }
+        ],
+        timeline_variables: [
+            { l: 'C.1. Spending time doing these things would make me happy' },
+            { l: 'C.2. I would be interested in doing things that involve other people' },
+            { l: 'C.3. I would be the one to plan these activities' },
+            { l: 'C.4. I would actively participate in these social activities' },
+        ]
+    }
+
+    var sensory=0;
+    var DARS_8 = {
+        timeline: [
+            {
+                type: jsPsychSurveyMultiChoice,
+                questions: [{
+                    prompt: jsPsych.timelineVariable('n'),
+                    options: ['not at all', 'slightly', 'moderately', 'mostly', 'very much'],
+                    required: true,
+                }],
+                on_finish() {
+                    console.log(DARS_result);
+                    if (jsPsych.data.get().last(1).select('response').values[0].Q0 == 'very much') {
+                        DARS_result+= 4;
+                        sensory+= 4;
+                    } else if (jsPsych.data.get().last(1).select('response').values[0].Q0 == 'mostly') {
+                        DARS_result += 3;
+                        sensory += 3;
+                    } else if (jsPsych.data.get().last(1).select('response').values[0].Q0 == 'moderately') {
+                        DARS_result += 2;
+                        sensory += 2;
+                    } else if (jsPsych.data.get().last(1).select('response').values[0].Q0 == 'slightly') {
+                        DARS_result += 1;
+                        sensory += 1;
+                    } else {
+                        DARS_result += 0;
+                        sensory += 0;
+                    }
+                    DARS_count++;
+                }
+            }
+        ],
+        timeline_variables: [
+            { n: 'D.1. I would actively seek out these experiences' },
+            { n: 'D.2. I get excited thinking about these experiences' },
+            { n: 'D.3. If I were to have these experiences I would savor every moment' },
+            { n: 'D.4. I want to have these experiences' },
+            { n: 'D.5. I would make an effort to spend time having these experiences' },
+        ],
+        data: [{
+            trial: 'DARS'
+        }],
+        on_timeline_finish: function () {
+            jsPsych.data.addProperties({ DARS: DARS_result });
+            jsPsych.data.addProperties({ Hobbies: hobbies });
+            jsPsych.data.addProperties({ Food: food });
+            jsPsych.data.addProperties({ Social: social });
+            jsPsych.data.addProperties({ Sensory: sensory });
+            jsPsych.data.addDataToLastTrial({ trial_type: 'DARS' });
+        },
+    }
+    var DARS_1 = {
+        type: jsPsychSurveyText,
+        questions: [
+            { prompt: 'A. Please list at least 2 of your favorite pastimes/hobbies that are NOT primarily social: ' }
+        ],
+        data: [{
+            trial: 'DARS'
+        }],
+    }
+
+    var DARS_3 = {
+        type: jsPsychSurveyText,
+        questions: [
+            { prompt: 'B. Please list at least 2 of your favorite foods or drinks: ' }
+        ],
+        data: [{
+            trial: 'DARS'
+        }],
+
+    }
+
+    var Age = {
+        type: jsPsychSurveyText,
+        questions: [
+            { prompt: 'What is your age (in years)? ',
+            required: true}
+        ],
+        data: [{
+            trial: 'Age'
+        }],
+        on_finish: function () {
+            jsPsych.data.addProperties({ Age: jsPsych.data.get().last(1).select('response').values[0].Q0 });
+            jsPsych.data.addDataToLastTrial({ trial_type: 'Age' });
+        },
+
+    }
+
+    var Race = {
+        type: jsPsychSurveyText,
+        questions: [
+            { prompt: 'What is your race/ethnicity? ',
+            required: true }
+        ],
+        data: [{
+            trial: 'Race'
+        }],
+        on_finish: function () {
+            jsPsych.data.addProperties({ Race: jsPsych.data.get().last(1).select('response').values[0].Q0 });
+            jsPsych.data.addDataToLastTrial({ trial_type: 'Race' });
+        },
+
+    }
+
+    var DARS_5 = {
+        type: jsPsychSurveyText,
+        questions: [
+            { prompt: 'C. Please list at least 2 of your favorite social activities: ' }
+        ],
+        data: [{
+            trial: 'DARS'
+        }],
+
+    }
+    var DARS_7 = {
+        type: jsPsychSurveyText,
+        questions: [
+            { prompt: 'D. Please list at least 2 of your favorite sensory experiences: ' }
+        ],
+        data: [{
+            trial: 'DARS'
+        }],
+    }
+
+    var PANAS_intro = {
+        type: jsPsychHtmlButtonResponse,
+        choices: ['Ready'],
+        response_ends_trial: true,
+        stimulus: '<h1>Positive and Negative Affect Schedule</h1> <p>5/9</p><p>This scale will be 20 questions long</p> <p><b>Instructions: </b></p><p>Indicate the extent you have felt this way over the past week',
+        on_finish: function () {
+            jsPsych.data.addDataToLastTrial({ response: '' });
+            jsPsych.data.addDataToLastTrial({ trial_type: '' });
+        }
+    }
+    var PANAS_count = 1;
+    var PANAS_positive_result = 0;
+    var PANAS_negative_result = 0;
+    var PANAS = {
+        timeline: [
+            {
+                type: jsPsychSurveyMultiChoice,
+                questions: [{
+                    prompt: jsPsych.timelineVariable('q'),
+                    options: ['Very slightly or not at all', 'A little', 'Moderately', 'Quite a bit', 'Extremely'],
+                    required: true
+                }],
+                on_finish() {
+                    console.log(PANAS_positive_result);
+                    console.log(PANAS_negative_result);
+                    if (jsPsych.data.get().last(1).select('response').values[0].Q0 == 'Very slightly or not at all' && (PANAS_count == 1 || PANAS_count == 3 || PANAS_count == 5 || PANAS_count == 9 || PANAS_count == 10 || PANAS_count == 12 || PANAS_count == 14 || PANAS_count == 16 || PANAS_count == 17 || PANAS_count == 19)) {
+                        PANAS_positive_result++;
+                    } else if (jsPsych.data.get().last(1).select('response').values[0].Q0 == 'A little' && (PANAS_count == 1 || PANAS_count == 3 || PANAS_count == 5 || PANAS_count == 9 || PANAS_count == 10 || PANAS_count == 12 || PANAS_count == 14 || PANAS_count == 16 || PANAS_count == 17 || PANAS_count == 19)) {
+                        PANAS_positive_result += 2;
+                    } else if (jsPsych.data.get().last(1).select('response').values[0].Q0 == 'Moderately' && (PANAS_count == 1 || PANAS_count == 3 || PANAS_count == 5 || PANAS_count == 9 || PANAS_count == 10 || PANAS_count == 12 || PANAS_count == 14 || PANAS_count == 16 || PANAS_count == 17 || PANAS_count == 19)) {
+                        PANAS_positive_result += 3;
+                    } else if (jsPsych.data.get().last(1).select('response').values[0].Q0 == 'Quite a bit' && (PANAS_count == 1 || PANAS_count == 3 || PANAS_count == 5 || PANAS_count == 9 || PANAS_count == 10 || PANAS_count == 12 || PANAS_count == 14 || PANAS_count == 16 || PANAS_count == 17 || PANAS_count == 19)) {
+                        PANAS_positive_result += 4;
+                    } else if (jsPsych.data.get().last(1).select('response').values[0].Q0 == 'Extremely' && (PANAS_count == 1 || PANAS_count == 3 || PANAS_count == 5 || PANAS_count == 9 || PANAS_count == 10 || PANAS_count == 12 || PANAS_count == 14 || PANAS_count == 16 || PANAS_count == 17 || PANAS_count == 19)) {
+                        PANAS_positive_result += 5;
+                    } else if (jsPsych.data.get().last(1).select('response').values[0].Q0 == 'Very slightly or not at all' && (PANAS_count == 2 || PANAS_count == 4 || PANAS_count == 6 || PANAS_count == 7 || PANAS_count == 8 || PANAS_count == 11 || PANAS_count == 13 || PANAS_count == 15 || PANAS_count == 18 || PANAS_count == 20)) {
+                        PANAS_negative_result++;
+                    } else if (jsPsych.data.get().last(1).select('response').values[0].Q0 == 'A little' && (PANAS_count == 2 || PANAS_count == 4 || PANAS_count == 6 || PANAS_count == 7 || PANAS_count == 8 || PANAS_count == 11 || PANAS_count == 13 || PANAS_count == 15 || PANAS_count == 18 || PANAS_count == 20)) {
+                        PANAS_negative_result += 2;
+                    } else if (jsPsych.data.get().last(1).select('response').values[0].Q0 == 'Moderately' && (PANAS_count == 2 || PANAS_count == 4 || PANAS_count == 6 || PANAS_count == 7 || PANAS_count == 8 || PANAS_count == 11 || PANAS_count == 13 || PANAS_count == 15 || PANAS_count == 18 || PANAS_count == 20)) {
+                        PANAS_negative_result += 3;
+                    } else if (jsPsych.data.get().last(1).select('response').values[0].Q0 == 'Quite a bit' && (PANAS_count == 2 || PANAS_count == 4 || PANAS_count == 6 || PANAS_count == 7 || PANAS_count == 8 || PANAS_count == 11 || PANAS_count == 13 || PANAS_count == 15 || PANAS_count == 18 || PANAS_count == 20)) {
+                        PANAS_negative_result += 4;
+                    } else if (jsPsych.data.get().last(1).select('response').values[0].Q0 == 'Extremely' && (PANAS_count == 2 || PANAS_count == 4 || PANAS_count == 6 || PANAS_count == 7 || PANAS_count == 8 || PANAS_count == 11 || PANAS_count == 13 || PANAS_count == 15 || PANAS_count == 18 || PANAS_count == 20)) {
+                        PANAS_negative_result += 5;
+                    }
+                    PANAS_count++;
+                }
+            }
+        ],
+        timeline_variables: [
+            { q: '1. Interested' },
+            { q: '2. Distressed' },
+            { q: '3. Excited' },
+            { q: '4. Upset' },
+            { q: '5. Strong' },
+            { q: '6. Guilty' },
+            { q: '7. Scared' },
+            { q: '8. Hostile' },
+            { q: '9. Enthusiastic' },
+            { q: '10. Proud' },
+            { q: '11. Irritable' },
+            { q: '12. Alert' },
+            { q: '13. Ashamed' },
+            { q: '14. Inspired' },
+            { q: '15. Nervous' },
+            { q: '16. Determined' },
+            { q: '17. Attentive' },
+            { q: '18. Jittery' },
+            { q: '19. Active' },
+            { q: '20. Afraid' },
+        ],
+        data: [{
+            trial: 'PANAS'
+        }],
+        on_timeline_finish: function () {
+            jsPsych.data.addProperties({ PANAS_positive: PANAS_positive_result });
+            jsPsych.data.addProperties({ PANAS_negative: PANAS_negative_result });
+            jsPsych.data.addDataToLastTrial({ trial_type: 'PANAS' });
+        },
+    }
+
+    var SUPPS_intro = {
+        type: jsPsychHtmlButtonResponse,
+        choices: ['Ready'],
+        response_ends_trial: true,
+        stimulus: '<h1>UPPS Questionnaire</h1> <p>9/9</p><p>This scale will be 20 questions long</p> <p><b>Instructions: </b>Next are a number of statements that describe ways in which people act and think. For each statement, please </p> <p>indicate how much you agree or disagree with the statement.  If you Agree Strongly circle 1, if you Agree</p><p>Somewhat circle 2, if you Disagree somewhat circle 3, and if you Disagree Strongly circle 4.  Be sure to</p><p>indicate your agreement or disagreement for every statement below. Also, there are questions on the following pages.</p>',
+        on_finish: function () {
+            jsPsych.data.addDataToLastTrial({ response: '' });
+            jsPsych.data.addDataToLastTrial({ trial_type: '' });
+        }
+    }
+
+    var SUPPS_NegUrg = 0;
+    var SUPPS_count = 1;
+    var SUPPS_PosUrg = 0;
+    var SUPPS_LackPers = 0;
+    var SUPPS_LackPrem = 0;
+    var SUPPS_SensSeek = 0;
+
+    var SUPPS = {
+        timeline: [
+            {
+                type: jsPsychSurveyLikert,
+                questions: [{
+                    prompt: jsPsych.timelineVariable('q'),
+                    //name: 'PSWQ',
+                    labels: ['Agree Strongly', 'Agree Somewhat', 'Disagree somewhat', 'Disagree Strongly'],
+                    scale_width: 500,
+                    required: true
+                }],
+                on_finish() {
+                    console.log(PSWQ_result);
+                    console.log(jsPsych.data.get().last(1).select('response').values[0].Q0);
+                    if (jsPsych.data.get().last(1).select('response').values[0].Q0 == 0) {
+                        if (SUPPS_count==6 || SUPPS_count==8 || SUPPS_count==13 || SUPPS_count==15){
+                            SUPPS_NegUrg++;
+                        } else if (SUPPS_count==1 || SUPPS_count==4 || SUPPS_count==7 || SUPPS_count==11){
+                            SUPPS_LackPers++;
+                        } else if (SUPPS_count==2 || SUPPS_count==5 || SUPPS_count==12 || SUPPS_count==19){
+                            SUPPS_LackPrem++;
+                        } else if (SUPPS_count==9 || SUPPS_count==14 || SUPPS_count==16 || SUPPS_count==18){
+                            SUPPS_SensSeek++;
+                        } else {
+                            SUPPS_PosUrg++;
+                        }
+                    } else if (jsPsych.data.get().last(1).select('response').values[0].Q0 == 1) {
+                        if (SUPPS_count==6 || SUPPS_count==8 || SUPPS_count==13 || SUPPS_count==15){
+                            SUPPS_NegUrg+= 2;
+                        } else if (SUPPS_count==1 || SUPPS_count==4 || SUPPS_count==7 || SUPPS_count==11){
+                            SUPPS_LackPers+= 2;
+                        } else if (SUPPS_count==2 || SUPPS_count==5 || SUPPS_count==12 || SUPPS_count==19){
+                            SUPPS_LackPrem+= 2;
+                        } else if (SUPPS_count==9 || SUPPS_count==14 || SUPPS_count==16 || SUPPS_count==18){
+                            SUPPS_SensSeek+= 2;
+                        } else {
+                            SUPPS_PosUrg+= 2;
+                        }
+                    } else if (jsPsych.data.get().last(1).select('response').values[0].Q0 == 2) {
+                        if (SUPPS_count==6 || SUPPS_count==8 || SUPPS_count==13 || SUPPS_count==15){
+                            SUPPS_NegUrg+= 3;
+                        } else if (SUPPS_count==1 || SUPPS_count==4 || SUPPS_count==7 || SUPPS_count==11){
+                            SUPPS_LackPers+= 3;
+                        } else if (SUPPS_count==2 || SUPPS_count==5 || SUPPS_count==12 || SUPPS_count==19){
+                            SUPPS_LackPrem+= 3;
+                        } else if (SUPPS_count==9 || SUPPS_count==14 || SUPPS_count==16 || SUPPS_count==18){
+                            SUPPS_SensSeek+= 3;
+                        } else {
+                            SUPPS_PosUrg+= 3;
+                        }
+                    } else {
+                        if (SUPPS_count==6 || SUPPS_count==8 || SUPPS_count==13 || SUPPS_count==15){
+                            SUPPS_NegUrg+= 4;
+                        } else if (SUPPS_count==1 || SUPPS_count==4 || SUPPS_count==7 || SUPPS_count==11){
+                            SUPPS_LackPers+= 4;
+                        } else if (SUPPS_count==2 || SUPPS_count==5 || SUPPS_count==12 || SUPPS_count==19){
+                            SUPPS_LackPrem+= 4;
+                        } else if (SUPPS_count==9 || SUPPS_count==14 || SUPPS_count==16 || SUPPS_count==18){
+                            SUPPS_SensSeek+= 4;
+                        } else {
+                            SUPPS_PosUrg+= 4;
+                        }
+                    } 
+                    SUPPS_count++;
+                }
+            }
+        ],
+        timeline_variables: [
+            { q: '1. I generally like to see things through to the end.' },
+            { q: '2. My thinking is usually careful and purposeful.' },
+            { q: '3. When I am in great mood, I tend to get into situations that could cause me problems.' },
+            { q: '4. Unfinished tasks really bother me. ' },
+            { q: '5. I like to stop and think things over before I do them.' },
+            { q: '6. When I feel bad, I will often do things I later regret in order to make myself feel better now.' },
+            { q: '7. Once I get going on something I hate to stop.' },
+            { q: '8. Sometimes when I feel bad, I cannot seem to stop what I am doing even though it is making me feel worse.' },
+            { q: '9. I quite enjoy taking risks.' },
+            { q: '10. I tend to lose control when I am in a great mood.' },
+            { q: '11. I finish what I start.' },
+            { q: '12. I tend to value and follow a rational, "sensible" approach to things.' },
+            { q: '13. When I am upset I often act without thinking.' },
+            { q: '14. I welcome new and exciting experiences and sensations, even if they are a little frightening and unconventional.' },
+            { q: '15. When I feel rejected, I will often say things that I later regret.' },
+            { q: '16. I would like to learn to fly an airplane.' },
+            { q: '17. Others are shocked or worried about the things I do when I am feeling very excited.' },
+            { q: '18. I would enjoy the sensation of skiing very fast down a high mountain slope.' },
+            { q: '19. I usually think carefully before doing anything.' },
+            { q: '20. I tend to act without thinking when I am really excited.' },
+        ],
+        data: [{
+            trial: 'SUPPS'
+        }],
+        on_timeline_finish: function () {
+            jsPsych.data.addProperties({ SUPPS_NegUrg: SUPPS_NegUrg });
+            jsPsych.data.addProperties({ SUPPS_LackPers: SUPPS_LackPers });
+            jsPsych.data.addProperties({ SUPPS_LackPrem: SUPPS_LackPrem });
+            jsPsych.data.addProperties({ SUPPS_SensSeek: SUPPS_SensSeek });
+            jsPsych.data.addProperties({ SUPPS_PosUrg: SUPPS_PosUrg });
+            jsPsych.data.addDataToLastTrial({ trial_type: 'SUPPS' });
+        },
+    }
+
+    var PSWQ_intro = {
+        type: jsPsychHtmlButtonResponse,
+        choices: ['Ready'],
+        response_ends_trial: true,
+        stimulus: '<h1>Penn State Worry Questionnaire</h1> <p>2/9</p><p>This scale will be 16 questions long</p> <p><b>Instructions: </b>Rate each of the following statements on a scale of 1 ("not at all typical of me" </p> <p>to 5 typical of me"). Please do not leave any items blank.</p>',
+        on_finish: function () {
+            jsPsych.data.addDataToLastTrial({ response: '' });
+            jsPsych.data.addDataToLastTrial({ trial_type: '' });
+        }
+    }
+    var PSWQ_count = 0;
+    var PSWQ_result = 0;
+    var PSWQ = {
+        timeline: [
+            {
+                type: jsPsychSurveyLikert,
+                questions: [{
+                    prompt: jsPsych.timelineVariable('q'),
+                    //name: 'PSWQ',
+                    labels: ['Not at all typical of me', ' ', ' ', ' ', 'Very typical of me'],
+                    scale_width: 500,
+                    required: true
+                }],
+                on_finish() {
+                    console.log(PSWQ_result);
+                    console.log(jsPsych.data.get().last(1).select('response').values[0].Q0);
+                    if (jsPsych.data.get().last(1).select('response').values[0].Q0 == 0) {
+                        PSWQ_result++;
+                        console.log('OMG 0');
+                        //jsPsych.data.get().last(1).select('response').values[0].Q0;
+                    } else if (jsPsych.data.get().last(1).select('response').values[0].Q0 == 1) {
+                        PSWQ_result += 2;
+                        console.log('OMG 1');
+                    } else if (jsPsych.data.get().last(1).select('response').values[0].Q0 == 2) {
+                        PSWQ_result += 3;
+                        console.log('OMG 2')
+                    } else if (jsPsych.data.get().last(1).select('response').values[0].Q0 == 3) {
+                        PSWQ_result += 4;
+                        console.log('OMG 3')
+                    } else {
+                        PSWQ_result += 5;
+                        console.log('OMG 4')
+                    }
+                    PSWQ_count++;
+                }
+            }
+        ],
+        timeline_variables: [
+            { q: '1. If I do not have enough time to do everything, I do not worry about it.' },
+            { q: '2. My worries overwhelm me.' },
+            { q: '3. I do not tend to worry about things.' },
+            { q: '4. Many situations make me worry.' },
+            { q: '5. I know I should not worry about things, but I just cannot help it.' },
+            { q: '6. When I am under pressure I worry a lot.' },
+            { q: '7. I am always worrying about something.' },
+            { q: '8. I find it easy to dismiss worrisome thoughts.' },
+            { q: '9. As soon as I finish one task, I start to worry about everything else I have to do.' },
+            { q: '10. I never worry about anything' },
+            { q: '11. When there is nothing more I can do about a concern, I do not worry about it any more.' },
+            { q: '12. I have been a worrier all my life.' },
+            { q: '13. I notice that I have been worrying about things.' },
+            { q: '14. Once I start worrying, I cannot stop.' },
+            { q: '15. I worry all the time.' },
+            { q: '16. I worry about projects until they are all done.' },
+        ],
+        data: [{
+            trial: 'PSWQ'
+        }],
+        on_timeline_finish: function () {
+            jsPsych.data.addProperties({ PSWQ: PSWQ_result });
+            jsPsych.data.addDataToLastTrial({ trial_type: 'PSWQ' });
+        },
+    }
+
+
+    var lastpart = {
+        type: jsPsychHtmlButtonResponse,
+        choices: ['Continue'],
+        response_ends_trial: true,
+        stimulus: '<p>Good job! You will now move on to the final portion of this study.</p><p>You will be asked to fill out a total of <b>8 questionnaires</b></p>',
+        on_finish: function () {
+            jsPsych.data.addDataToLastTrial({ response: '' });
+            jsPsych.data.addDataToLastTrial({ trial_type: '' });
+        }
+    }
+
+    n = 0;
+
+    function shuffle(array) {
+        let currentIndex = array.length, randomIndex;
+        while (currentIndex != 0) {
+            randomIndex = Math.floor(Math.random() * currentIndex);
+            currentIndex--;
+            [array[currentIndex], array[randomIndex]] = [
+                array[randomIndex], array[currentIndex]];
+        }
+        return array;
+    }
+
+    var random_seedword = shuffle(seedword)
+
+    function stimuli() {
+        var oneseedword = seedword[num];
+        num++;
+        return oneseedword;
+    }
+
+    const interlude = {
+        type: jsPsychHtmlButtonResponse,
+        stimulus: '<p>Good job! </p><p>You will now complete the second part of this study</p>',
+        choices: ['Continue'],
+        trial_duration: 5000,
+        response_ends_trial: true,
+        on_finish: function () {
+            jsPsych.data.addDataToLastTrial({ response: '' });
+            jsPsych.data.addDataToLastTrial({ trial_type: '' });
+            cleaninputs(studydata);
+        }
+    }
+    var final_trial = {
+        type: jsPsychHtmlKeyboardResponse,
+        stimulus:
+            `<p>You have finished the last task. Thanks for participating!</p>'
+            <p><a href="https://app.prolific.co/submissions/complete?cc=3F388D49">Click here to return to Prolific and complete the study</a>.</p>`,
+        choices: "NO_KEYS",
+        on_finish: function () {
+            jsPsych.data.addDataToLastTrial({ trial_type: '' });
+        }
+    }
+    var filename = subject_id + '.csv';
+
+    var endscreen = {
+        //type: jsPsychExternalHtml,
+        type: jsPsychHtmlKeyboardResponse,
+        trial_duration: 5500,
+        stimulus: '<h>Thank you, that was it! Please wait while we redirect you to Prolific</h>',
+        //<p><a href="https://app.prolific.co/submissions/complete?cc=3F388D49">Click here to return to Prolific and complete the study</a>.</p>`,
+        choices: "NO_KEYS",
+        on_start: function (data) {
+            //jsPsych.data.get().localSave("csv", "data/test.csv")
+            //jsPsych.data.get().localSave("csv", filename)
+        },
+        on_finish: function () {
+            jsPsych.data.addDataToLastTrial({ trial_type: '' });
+        }
+    }
+    var example = {
+        type: jsPsychImageButtonResponse,
+        prompt: '<p>Here is another example. </p><p>Please take a look to look at the word progression above, where every new word is associated with the last one.</p>',
+        stimulus: 'img/instructions_all.png',
+        choices: ['Continue'],
+        on_finish: function () {
+            jsPsych.data.addDataToLastTrial({ response: '' });
+            jsPsych.data.addDataToLastTrial({ trial_type: '' });
+        }
+    }
+    var introduction = {
+        timeline: [
+            {
+                type: jsPsychInstructions,
+                pages: [
+                    '<h1>Instructions</h1><p>Hello! </p><p>This is a word-association task.</p>',
+                    '<p>You will first be presented with a seed word. </p><p> After viewing this word, you have to come up with a different word that you associate with that seed word.</p><p>To submit your word, type it in the text box and then press ENTER.</p><p>You will need to submit your word <b>as quickly as possible</b>.</p><p>After that, you will have to submit a new word that you associate with the first word that you thought of.</p><p>Each word you submit <b>should be associated with the previous word that you came up with.</b></p> <p> Please do <b>not submit the names of people or places, numbers, or random words.</b></p>',
+                    '<p>Please continue to come up with associated words until you reach <b>10</b>. </p><p> After that, we will provide you with a new seed word. </p><p>You will only have <b>4.5 seconds</b> to write down each of your words. </p><p> If you repeatedly fail to submit your word on time, <b>we may have to discontinue your participation.</b></p>',
+                    '<p>Again, you can only submit <b>ONE WORD</b> at a time. </p><p>Do <b>NOT </b>submit <b>numbers, or names of people, brands, or places.</b></p>',
+                    '<p>Finally, <b>do not worry about spell-checking.</b></p><p>You will <b>later have the opportunity</b> to submit a spelling correction, if you want to.</p>',
+                    '<p>Here is an example: </p><p>If we provide you with the seed word "ball", you may first think of "soccer". </p><p>Next, you may think of "competition". And, after that, you may think of "international".</p><p>Note how "ball" and "international" may not be immediately related, </p><p>but "competition" and "international" are.</p>'
+                ],
+                show_clickable_nav: true,
+                on_finish: function () {
+                    jsPsych.data.addDataToLastTrial({ trial_type: '' });
+                }
+            }
+        ]
+    }
+    var time_limit = 5000;
+    var start_time2;
+    var end_test_timer;
+    var trial_count = 1;
+    var n_trials = 20;
+    var counter2 = 1;
+    var intertrial = {
+        type: jsPsychHtmlKeyboardResponse,
+        stimulus: 'WOW',
+        choices: "NO_KEYS",
+        trial_duration: 150
+    }
+    var seednum = 1;
+    var rand_subject_id;
+    var datatrial = [];
+    var stim = '';
+    var task = {
+        timeline: [
+            {
+                type: jsPsychSurveyText,
+                questions: [
+                    { prompt: function () { return (jsPsych.timelineVariable('word') + '<br>' + seednum + ' out of 21') } },
+                ],
+                name: task,
+                preamble: 'Seed word:',
+                post_trial_gap: 50,
+                on_load: function () {
+                    start_time2 = performance.now();
+                    datatrial = []
+                    end_test_timer = setTimeout(function () {
+                        end_time = performance.now();
+                        elapsed_time = end_time - start_time2;
+                        console.log("setTimeout elapsed time: ", elapsed_time);
+                        jsPsych.data.addDataToLastTrial({ response: '' });
+                        console.log(jsPsych.data.get().last(1).select('response').lenght)
+                        jsPsych.finishTrial();
+                    }, time_limit);
+
+                },
+                on_finish: function () {
+                    clearTimeout(end_test_timer);
+                    //datatrial.push(jsPsych.data.get().last(1).select('response').values[0].Q0 );
+                    //console.log(jsPsych.data.get().last(1).select('response').values[0].length);
+                    jsPsych.data.addDataToLastTrial({ stimulus: jsPsych.timelineVariable('word') });
+                    if (jsPsych.data.get().last(1).select('response').values.length == 0) { } else {
+                        //if (jsPsych.data.get().last(1).select('response').values[0].length == 0) { } else {
+                        stim = jsPsych.data.get().last(1).select('response').values[0].Q0;
+                        jsPsych.data.addDataToLastTrial({ response: jsPsych.data.get().last(1).select('response').values[0].Q0 });
+                    }
+                    jsPsych.data.addDataToLastTrial({ trial_type: 'associations' });
+                    intertrial;
+                    seednum++;
+                },
+            },
+
+            {
+                type: jsPsychSurveyText,
+                post_trial_gap: 150,
+                name: task,
+                questions: [
+                    {
+                        prompt: function () {
+                            studydata.push(jsPsych.timelineVariable('word'));
+                            iterationdata.push(jsPsych.timelineVariable('word'));
+                            //console.log(jsPsych.data.get().last(1).select('response').values.length);
+                            if ((jsPsych.data.get().last(1).select('response').values.length == 0)) { }
+                            else {
+                                datatrial = jsPsych.data.get().last(1).select('response').values[0];
+                            }
+                            if (datatrial.length == 0) {
+                                return iterationdata[(iterationdata.length) - 1] + '<br>' + trial_count + '/10';
+                            } else {
+                                studydata.push(datatrial);
+                                iterationdata.push(datatrial);
+                                return iterationdata[(iterationdata.length) - 1] + '<br>' + trial_count + '/10';
+
+                            }
+                        }
+                    }
+                ],
+                response_ends_trial: true,
+                on_load: function () {
+                    start_time2 = performance.now();
+                    datatrial = [];
+                    end_test_timer = setTimeout(function () {
+                        end_time = performance.now();
+                        //datatrial = [];
+                        elapsed_time = end_time - start_time2;
+                        console.log("setTimeout elapsed time: ", elapsed_time);
+                        jsPsych.data.addDataToLastTrial({ response: '' });
+                        jsPsych.finishTrial();
+                    }, time_limit);
+                },
+                on_finish: function () {
+                    trial_count++;
+                    clearTimeout(end_test_timer);
+                    //console.log(jsPsych.data.get().last(1).select('response').values[0].length);
+                    datatrial = [];
+                    jsPsych.data.addDataToLastTrial({ stimulus: iterationdata[(iterationdata.length) - 1] });
+                    studydata.push(iterationdata[(iterationdata.length) - 1]);
+
+                    if (jsPsych.data.get().last(1).select('response').values.length == 0) { } else {
+                        stim = jsPsych.data.get().last(1).select('response').values[0].Q0;
+                        jsPsych.data.addDataToLastTrial({ response: jsPsych.data.get().last(1).select('response').values[0].Q0 });
+                        studydata.push(jsPsych.data.get().last(1).select('response').values[0].Q0);
+                    }
+                    jsPsych.data.addDataToLastTrial({ trial_type: 'associations' });
+                    //jsPsych.data.get().last(1).select('stimulus').push(iterationdata[(iterationdata.length) - 1]);
+                    intertrial;
+                },
+            },
+            {
+                timeline: [
+                    {
+                        type: jsPsychSurveyText,
+                        name: task,
+                        post_trial_gap: 50,
+                        questions: [
+                            {
+                                prompt: function () {
+                                    if ((jsPsych.data.get().last(1).select('response').values.length == 0)) { }
+                                    else {
+                                        datatrial = jsPsych.data.get().last(1).select('response').values[0];
+                                    }
+                                    if (datatrial.length == 0) {
+                                        studydata.push(iterationdata[(iterationdata.length) - 1]);
+                                        iterationdata.push(iterationdata[(iterationdata.length) - 1]);
+                                        return iterationdata[(iterationdata.length) - 1] + '<br>' + trial_count + '/10';
+                                    } else {
+                                        studydata.push(datatrial);
+                                        iterationdata.push(datatrial);
+                                        return iterationdata[(iterationdata.length) - 1] + '<br>' + trial_count + '/10';
+
+                                    }
+                                }
+                            }
+                        ],
+                        on_load: function () {
+                            start_time2 = performance.now();
+                            datatrial = [];
+                            end_test_timer = setTimeout(function () {
+                                end_time = performance.now();
+                                //datatrial = [];
+                                elapsed_time = end_time - start_time2;
+                                console.log("setTimeout elapsed time: ", elapsed_time);
+                                jsPsych.data.addDataToLastTrial({ response: '' });
+                                jsPsych.finishTrial();
+                            }, time_limit);
+                        },
+                        on_finish: function () {
+                            trial_count++;
+                            clearTimeout(end_test_timer);
+                            jsPsych.data.addDataToLastTrial({ stimulus: iterationdata[(iterationdata.length) - 1] });
+                            studydata.push(iterationdata[(iterationdata.length) - 1]);
+                            jsPsych.data.addDataToLastTrial({ trial_type: 'associations' });
+                            datatrial = [];
+                            intertrial;
+                            if (jsPsych.data.get().last(1).select('response').values.length == 0) { } else {
+                                console.log(jsPsych.data.get().last(1).select('response').values[0].Q0);
+                                //console.log(stim);
+                                //studydata.push(stim);
+                                //console.log("LOOOL");
+                                //console.log(studydata[studydata.length - 1]);
+                                stim = jsPsych.data.get().last(1).select('response').values[0].Q0;
+                                console.log(stim);
+                                jsPsych.data.addDataToLastTrial({ response: jsPsych.data.get().last(1).select('response').values[0].Q0 });
+                            }
+                        },
+                    }
+                ],
+                repetitions: 8
+            },
+            {
+                type: jsPsychHtmlButtonResponse,
+                stimulus: function () {
+                    if (seednum <= 21) {
+                        console.log(stim);
+                        studydata.push(stim);
+                        console.log(studydata);
+                        return '<p>Pause.</p> A new seed word is coming.'
+                    }
+                    else {
+                        console.log(stim);
+                        studydata.push(stim);
+                        console.log(studydata);
+                        return '<p>Pause.</p>'
+                    }
+                },
+                choices: ['Ready'],
+                post_trial_gap: 50,
+                response_ends_trial: true,
+                trial_duration: 5000,
+                on_finish: function () {
+                    trial_count = 1;
+                    //studydata.push(stim);
+                    //studydata.push(jsPsych.data.get().last(1).select('response').values[0].Q0);
+                    //console.log(studydata[studydata.length - 1]);
+                    //console.log(stim);
+                    jsPsych.data.addDataToLastTrial({ stimulus: stim });
+                    jsPsych.data.addDataToLastTrial({ trial_type: 'associations' });
+                },
+            }
+        ],
+        timeline_variables: [
+            { word: 'win' },
+            { word: 'beautiful' },
+            { word: 'spouse' },
+            { word: 'heart' },
+            { word: 'father' },
+            { word: 'trip' },
+            { word: 'future' },
+            { word: 'failure' },
+            { word: 'shame' },
+            { word: 'pain' },
+            { word: 'worry' },
+            { word: 'jealousy' },
+            { word: 'crisis' },
+            { word: 'alone' },
+            { word: 'noise' },
+            { word: 'want' },
+            { word: 'beginning' },
+            { word: 'teach' },
+            { word: 'breath' },
+            { word: 'advice' },
+            { word: 'memory' },
+        ],
+        randomize_order: true,
+        on_timeline_finish: function () {
+            //jsPsych.data.addProperties({ associations_data: studydata });
+        },
+
+    }
+    var seednum_prac = 1;
+    var iterationdatatest = [];
+    var Practice_task = {
+        timeline: [
+            {
+                type: jsPsychSurveyText,
+                questions: [
+                    { prompt: function () { return (jsPsych.timelineVariable('word') + '<br>' + seednum_prac + ' out of 2') } },
+                ],
+                name: task,
+                preamble: 'Seed word:',
+                post_trial_gap: 50,
+                on_load: function () {
+                    start_time2 = performance.now();
+                    datatrial = []
+                    end_test_timer = setTimeout(function () {
+                        end_time = performance.now();
+                        elapsed_time = end_time - start_time2;
+                        console.log("setTimeout elapsed time: ", elapsed_time);
+                        jsPsych.data.addDataToLastTrial({ response: '' });
+                        console.log(jsPsych.data.get().last(1).select('response').lenght)
+                        jsPsych.finishTrial();
+                    }, time_limit);
+                },
+                on_finish: function () {
+                    clearTimeout(end_test_timer);
+                    //datatrial.push(jsPsych.data.get().last(1).select('response').values[0].Q0 );
+                    //console.log(jsPsych.data.get().last(1).select('response').values[0].length);
+                    jsPsych.data.addDataToLastTrial({ stimulus: jsPsych.timelineVariable('word') });
+                    if (jsPsych.data.get().last(1).select('response').values.length == 0) { } else {
+                        //if (jsPsych.data.get().last(1).select('response').values[0].length == 0) { } else {
+                        stim = jsPsych.data.get().last(1).select('response').values[0].Q0;
+                        jsPsych.data.addDataToLastTrial({ response: jsPsych.data.get().last(1).select('response').values[0].Q0 });
+                    }
+                    jsPsych.data.addDataToLastTrial({ trial_type: 'test_associations' });
+                    intertrial;
+                    seednum_prac = seednum_prac + 5;
+                },
+            },
+
+            {
+                type: jsPsychSurveyText,
+                post_trial_gap: 150,
+                name: task,
+                questions: [
+                    {
+                        prompt: function () {
+                            iterationdatatest.push(jsPsych.timelineVariable('word'));
+                            //console.log(jsPsych.data.get().last(1).select('response').values.length);
+                            if ((jsPsych.data.get().last(1).select('response').values.length == 0)) { }
+                            else {
+                                datatrial = jsPsych.data.get().last(1).select('response').values[0];
+                            }
+                            if (datatrial.length == 0) {
+                                return iterationdatatest[(iterationdatatest.length) - 1] + '<br>' + trial_count + '/10';
+                            } else {
+                                iterationdatatest.push(datatrial);
+                                return iterationdatatest[(iterationdatatest.length) - 1] + '<br>' + trial_count + '/10';
+
+                            }
+                        }
+                    }
+                ],
+                response_ends_trial: true,
+                on_load: function () {
+                    start_time2 = performance.now();
+                    datatrial = [];
+                    end_test_timer = setTimeout(function () {
+                        end_time = performance.now();
+                        //datatrial = [];
+                        elapsed_time = end_time - start_time2;
+                        console.log("setTimeout elapsed time: ", elapsed_time);
+                        jsPsych.data.addDataToLastTrial({ response: '' });
+                        jsPsych.finishTrial();
+                    }, time_limit);
+                },
+                on_finish: function () {
+                    trial_count++;
+                    clearTimeout(end_test_timer);
+                    //console.log(jsPsych.data.get().last(1).select('response').values[0].length);
+                    datatrial = [];
+                    jsPsych.data.addDataToLastTrial({ stimulus: iterationdatatest[(iterationdatatest.length) - 1] });
+
+                    if (jsPsych.data.get().last(1).select('response').values.length == 0) { } else {
+                        stim = jsPsych.data.get().last(1).select('response').values[0].Q0;
+                        jsPsych.data.addDataToLastTrial({ response: jsPsych.data.get().last(1).select('response').values[0].Q0 });
+                    }
+                    jsPsych.data.addDataToLastTrial({ trial_type: 'test_associations' });
+                    //jsPsych.data.get().last(1).select('stimulus').push(iterationdata[(iterationdata.length) - 1]);
+                    intertrial;
+                },
+            },
+            {
+                timeline: [
+                    {
+                        type: jsPsychSurveyText,
+                        name: task,
+                        post_trial_gap: 50,
+                        questions: [
+                            {
+                                prompt: function () {
+                                    if ((jsPsych.data.get().last(1).select('response').values.length == 0)) { }
+                                    else {
+                                        datatrial = jsPsych.data.get().last(1).select('response').values[0];
+                                    }
+                                    if (datatrial.length == 0) {
+                                        iterationdatatest.push(iterationdatatest[(iterationdatatest.length) - 1]);
+                                        return iterationdatatest[(iterationdatatest.length) - 1] + '<br>' + trial_count + '/10';
+                                    } else {
+                                        iterationdatatest.push(datatrial);
+                                        return iterationdatatest[(iterationdatatest.length) - 1] + '<br>' + trial_count + '/10';
+
+                                    }
+                                }
+                            }
+                        ],
+                        on_load: function () {
+                            start_time2 = performance.now();
+                            datatrial = [];
+                            end_test_timer = setTimeout(function () {
+                                end_time = performance.now();
+                                //datatrial = [];
+                                elapsed_time = end_time - start_time2;
+                                console.log("setTimeout elapsed time: ", elapsed_time);
+                                jsPsych.data.addDataToLastTrial({ response: '' });
+                                jsPsych.finishTrial();
+                            }, time_limit);
+                        },
+                        on_finish: function () {
+                            trial_count++;
+                            clearTimeout(end_test_timer);
+                            jsPsych.data.addDataToLastTrial({ stimulus: iterationdatatest[(iterationdatatest.length) - 1] });
+                            if (jsPsych.data.get().last(1).select('response').values.length == 0) { } else {
+                                stim = jsPsych.data.get().last(1).select('response').values[0].Q0;
+                                jsPsych.data.addDataToLastTrial({ response: jsPsych.data.get().last(1).select('response').values[0].Q0 });
+                            }
+                            jsPsych.data.addDataToLastTrial({ trial_type: 'test_associations' });
+                            datatrial = [];
+                            intertrial;
+                        },
+                    }
+                ],
+                repetitions: 8
+            },
+            {
+                type: jsPsychHtmlButtonResponse,
+                stimulus: function () {
+                    if (seednum_prac <= 2) { return '<p>Pause.</p> A new seed word is coming.' }
+                    else { return '<p>Pause.</p>' }
+                },
+                choices: ['Ready'],
+                post_trial_gap: 50,
+                response_ends_trial: true,
+                trial_duration: 5000,
+                on_finish: function () {
+                    trial_count = 1;
+                    jsPsych.data.addDataToLastTrial({ stimulus: stim });
+                    jsPsych.data.addDataToLastTrial({ trial_type: 'test_associations' });
+                },
+            }
+        ],
+        timeline_variables: [
+            { word: 'milk' },
+            { word: 'plant' }
+        ],
+        randomize_order: true,
+        on_timeline_finish: function () {
+            //jsPsych.data.addProperties({ associations_data: studydata });
+        },
+
+    }
+
+    var wow = 0;
+    var werd = '';
+    var savestim;
+    var makequestionstrials = {
+
+        timeline: [
+            {
+                type: jsPsychHtmlSliderResponse,
+                stimulus: jsPsych.timelineVariable('data_array'),
+                labels: ['Hate it', 'Love it'],
+                slider_width: 500,
+                require_movement: true,
+                prompt: '<p>How much do you enjoy thinking about this word?</p>',
+                on_finish: function () {
+                    savestim = jsPsych.timelineVariable('data_array');
+                    jsPsych.data.addDataToLastTrial({ trial_type: 'effort' });
+                }
+            },
+            {
+                type: jsPsychHtmlSliderResponse,
+                stimulus: jsPsych.timelineVariable('data_array'),
+                labels: ['Not at all', 'Very much so'],
+                slider_width: 500,
+                require_movement: true,
+                prompt: '<p>Do you believe you think about this word <b>more than you should </b>in your daily life?</p>',
+                on_load: function () {
+                    lengthhh = cleanstudydata.length;
+                },
+                on_finish: function () {
+                    wow +=2;
+                    jsPsych.data.addDataToLastTrial({ trial_type: 'pathology' });
+                }
+            },
+            {
+                type: jsPsychSurveyText,
+                post_trial_gap: 50,
+                response_ends_trial: true,
+                questions: [
+                    { prompt: '<p>Did you spell that last word incorrectly? </p><p>If so, please type the correct word below:</p><p>(Leave blank if correct)</p>' }
+                ],
+                on_finish: function () {
+                    jsPsych.data.addDataToLastTrial({ stimulus: savestim });
+                    jsPsych.data.addDataToLastTrial({ trial_type: 'correction' });
+                    jsPsych.data.addDataToLastTrial({ response: jsPsych.data.get().last(1).select('response').values[0].Q0 });
+                }
+
+            },
+
+        ],
+        timeline_variables: [
+            {
+                data_array: function () {
+                    console.log(wow);
+                    lengthhh = cleanstudydata.length;
+                    console.log(cleanstudydata.length);
+                    return cleanstudydata[wow];
+                }
+            }
+        ],
+        loop_function: function () {
+            if (wow < cleanstudydata.length) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }
+
+
+    var lengthhh = 0;
+
+    var cleanstudydata = [];
+
+    function cleaninputs(studydata) {
+        cleanstudydata[0] = studydata[0];
+        let marta = 0;
+        for (let i = 1; i < studydata.length; i++) {
+            for (let j = 0; j < cleanstudydata.length; j++) {
+                if (studydata[i] == cleanstudydata[j]) {
+                    marta++;
+                }
+            }
+            if (marta == 0 && studydata[i] != undefined && studydata[i] != "" && studydata[i] != " ") {
+                cleanstudydata.push(studydata[i]);
+            } else {
+                marta = 0;
+            }
+        }
+        lengthhh = cleanstudydata.length;
+        cleanstudydata = shuffle(cleanstudydata);
+        console.log(cleanstudydata)
+        console.log(studydata)
+        return cleanstudydata;
+    }
+
+    var omg;
+    var pavlovia_finish = {
+        type: jsPsychPavlovia,
+        command: "finish",
+        participantId: subject_id
+    };
+
+    timeline = [pavlovia_init, consent, Gender, Age, Race, introduction, example, Practice, Practice_task, IntroNine, task, interlude, makequestionstrials, RRS_intro, RRS, PSWQ_intro, PSWQ, PTQ_intro, PTQ, MWQ_intro, MWQ, PANAS_intro, PANAS, DARS_intro, DARS_1, DARS_2, DARS_3, DARS_4, DARS_5, DARS_6, DARS_7, DARS_8, DAS_intro, DAS, PSS_intro, PSS, SUPPS_intro, SUPPS, endscreen, pavlovia_finish];
+
+
+    jsPsych.run(timeline);
+
+</script>
+
+</html>
